@@ -47,9 +47,14 @@ export default function App() {
 
     return (
         <>
+            <h1>Check your MetaMask wallet balance!</h1>
+            <p>
+                Click the Connect to MetaMask button below to see your balance
+            </p>
             <Button
                 onClick={handleOnConnectClick}
                 isInitialising={isConnectingToMetaMask}
+                isConnected={isConnected}
             >
                 Connect to MetaMask <MetaMaskLogo width={25} height={25} />
             </Button>
