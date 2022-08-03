@@ -9,7 +9,7 @@ interface Props {
     isInitialising?: boolean;
     isConnected?: boolean;
     reload?: boolean;
-    children: (string | ReactElement)[];
+    children: ReactElement;
 }
 
 export default function Button(props: Props) {

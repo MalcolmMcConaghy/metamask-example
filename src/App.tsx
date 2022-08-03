@@ -1,3 +1,4 @@
+/* eslint-disable consistent-return */
 /* eslint-disable no-restricted-globals */
 import { useEffect, useState } from 'react';
 import { ethers } from 'ethers';
@@ -28,24 +29,33 @@ export default function App() {
         sethaveMetamask(true);
     };
 
+    const getBalance = async () => {
+        if (!accountAddress) return;
+        const balance = await provider.getBalance(accountAddress);
+        const formattedBalance = ethers.utils.formatEther(balance);
+        const roundedBalance = Math.round(Number(formattedBalance) * 1e4) / 1e4;
+        setAccountBalance(roundedBalance.toString());
+    };
+
+    const getAccountAndBalance = async () => {
+        const response = await ethereum.request({
+            method: 'eth_requestAccounts',
+        });
+        setAccountAddress(response[0]);
+        await getBalance();
+        setConnectedNetwork(
+            chainIdMap.get(window.ethereum.networkVersion) ?? '',
+        );
+
+        setIsConnected(true);
+    };
+
     const handleOnConnectClick = async () => {
         setIsConnectingToMetaMask(true);
         await new Promise((r) => setTimeout(r, 2000));
         try {
             checkMetamaskAvailability();
-            const response = await ethereum.request({
-                method: 'eth_requestAccounts',
-            });
-            setAccountAddress(response[0]);
-
-            const balance = await provider.getBalance(response[0]);
-            const formattedBalance = ethers.utils.formatEther(balance);
-
-            setConnectedNetwork(
-                chainIdMap.get(window.ethereum.networkVersion) ?? '',
-            );
-            setAccountBalance(formattedBalance);
-            setIsConnected(true);
+            await getAccountAndBalance();
             setIsConnectingToMetaMask(false);
         } catch (error) {
             setIsConnected(false);
@@ -53,7 +63,7 @@ export default function App() {
     };
 
     const handleOnReloadClick = () => {
-        location.reload();
+        window.location.reload();
     };
 
     const handleOnBalanceClick = async () => {
@@ -70,7 +80,9 @@ export default function App() {
                     currency: 'USD',
                 });
 
-                const usdPrice = formatter.format(coinResponse.coin.price);
+                const usdPrice = formatter.format(
+                    coinResponse.coin.price * Number(accountBalance),
+                );
                 setUSDPrice(usdPrice);
             } catch (error) {
                 setIsConnected(false);
@@ -105,6 +117,20 @@ export default function App() {
         setUnsupportedNetwork(true);
     }, [tokenName, isConnected]);
 
+    useEffect(() => {
+        if (!ethereum) return;
+        ethereum.on('chainChanged', () => {
+            window.location.reload();
+        });
+        ethereum.on('accountsChanged', () => {
+            window.location.reload();
+        });
+    });
+
+    useEffect(() => {
+        provider.on('block', getBalance);
+    }, [getBalance]);
+
     return (
         <>
             <h1>Check your MetaMask wallet balance!</h1>
@@ -114,7 +140,7 @@ export default function App() {
             {unsupportedNetwork ? (
                 <>
                     <Button onClick={handleOnReloadClick} reload>
-                        Reload <MetaMaskLogo width={25} height={25} />
+                        <>Reload</>
                     </Button>
                     <p>
                         The current connected network is an unsupported network.
@@ -128,11 +154,15 @@ export default function App() {
                     isInitialising={isConnectingToMetaMask}
                     isConnected={isConnected}
                 >
-                    Connect to MetaMask <MetaMaskLogo width={25} height={25} />
+                    <>
+                        Connect to MetaMask{' '}
+                        <MetaMaskLogo width={25} height={25} />
+                    </>
                 </Button>
             )}
             {isConnected &&
                 !isConnectingToMetaMask &&
+                !unsupportedNetwork &&
                 accountAddress &&
                 accountBalance && (
                     <AccountDetails
