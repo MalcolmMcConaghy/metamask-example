@@ -1,15 +1,16 @@
-import { ReactComponent as MetaMaskLogo } from '../../assets/metamask-fox.svg';
+import { ReactElement } from 'react';
 import './Button.css';
 
 interface Props {
     onClick: () => void;
+    children: (string | ReactElement)[];
 }
 
 export default function Button(props: Props) {
-    const { onClick } = props;
+    const { onClick, children } = props;
     return (
         <button className="button" type="button" onClick={onClick}>
-            Connect to MetaMask <MetaMaskLogo width={25} height={25} />
+            {children}
         </button>
     );
 }
