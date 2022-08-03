@@ -5,8 +5,10 @@
   "dependencies": {
     "@web3-react/core": "^6.1.9",
     "@web3-react/injected-connector": "^6.0.7",
+    "bootstrap": "^5.2.0",
     "ethers": "^5.3.1",
     "react": "^17.0.2",
+    "react-bootstrap": "^2.4.0",
     "react-dom": "^17.0.2",
     "react-scripts": "4.0.3"
   },

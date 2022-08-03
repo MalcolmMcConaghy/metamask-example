@@ -4,6 +4,7 @@ interface Props {
     onClick: () => void;
     address: string;
     balance: string;
+    tokenName: string;
 }
 
 function truncateString(str: string, num: number) {
@@ -13,11 +14,11 @@ function truncateString(str: string, num: number) {
 }
 
 export default function AccountDetails(props: Props) {
-    const { onClick, address, balance } = props;
+    const { onClick, address, balance, tokenName } = props;
     return (
         <div className="accountDetails">
             <button className="balanceButton" type="button" onClick={onClick}>
-                {balance}
+                {balance} {tokenName}
             </button>
             <div className="address">{truncateString(address, 7)}</div>
         </div>
