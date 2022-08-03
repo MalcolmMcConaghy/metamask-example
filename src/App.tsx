@@ -1,13 +1,19 @@
+import { useWeb3React } from '@web3-react/core';
 import { useEffect, useState } from 'react';
+import { ethers } from 'ethers';
 import { ReactComponent as MetaMaskLogo } from './assets/metamask-fox.svg';
 import Button from './components/Button/Button';
+import { MetaMask } from './connectors';
 
 export default function App() {
     const [haveMetamask, sethaveMetamask] = useState(true);
     const [isConnected, setIsConnected] = useState(false);
     const [accountAddress, setAccountAddress] = useState('');
+    const [accountBalance, setAccountBalance] = useState('');
     const [isConnectingToMetaMask, setIsConnectingToMetaMask] = useState(false);
     const { ethereum } = window;
+    const web3React = useWeb3React();
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
 
     const checkMetamaskAvailability = () => {
         if (!ethereum) {
@@ -25,6 +31,11 @@ export default function App() {
                 method: 'eth_requestAccounts',
             });
             setAccountAddress(response[0]);
+
+            const balance = await provider.getBalance(response[0]);
+            const formattedBalance = ethers.utils.formatEther(balance);
+
+            setAccountBalance(formattedBalance);
             setIsConnected(true);
             setIsConnectingToMetaMask(false);
         } catch (error) {
@@ -34,11 +45,13 @@ export default function App() {
 
     useEffect(() => {
         checkMetamaskAvailability();
+        web3React.activate(MetaMask);
     }, []);
 
     useEffect(() => {
-        console.log(accountAddress);
-    }, [accountAddress]);
+        console.log(accountAddress, accountBalance);
+        console.log({ web3React });
+    }, [accountAddress, accountBalance]);
 
     return (
         <Button
