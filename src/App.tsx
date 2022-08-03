@@ -139,6 +139,8 @@ export default function App() {
         provider.on('block', getBalance);
     }, [getBalance]);
 
+    console.log(connectedNetwork);
+
     return (
         <>
             <h1>Check your MetaMask wallet balance!</h1>

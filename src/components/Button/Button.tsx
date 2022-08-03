@@ -28,6 +28,7 @@ export default function Button(props: Props) {
             type="button"
             onClick={onClick}
             disabled={isInitialising || isConnected}
+            data-testid="connectButton"
         >
             {isInitialising ? (
                 <>
