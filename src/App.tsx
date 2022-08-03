@@ -6,7 +6,7 @@ export default function App() {
     const [haveMetamask, sethaveMetamask] = useState(true);
     const [isConnected, setIsConnected] = useState(false);
     const [accountAddress, setAccountAddress] = useState('');
-    const [connectingToMetaMask, setConnectingToMetaMask] = useState(false);
+    const [isConnectingToMetaMask, setIsConnectingToMetaMask] = useState(false);
     const { ethereum } = window;
 
     const checkMetamaskAvailability = () => {
@@ -17,7 +17,8 @@ export default function App() {
     };
 
     const handleOnConnectClick = async () => {
-        setConnectingToMetaMask(true);
+        setIsConnectingToMetaMask(true);
+        await new Promise((r) => setTimeout(r, 2000));
         try {
             checkMetamaskAvailability();
             const response = await ethereum.request({
@@ -25,7 +26,7 @@ export default function App() {
             });
             setAccountAddress(response[0]);
             setIsConnected(true);
-            setConnectingToMetaMask(false);
+            setIsConnectingToMetaMask(false);
         } catch (error) {
             setIsConnected(false);
         }
@@ -40,7 +41,10 @@ export default function App() {
     }, [accountAddress]);
 
     return (
-        <Button onClick={handleOnConnectClick}>
+        <Button
+            onClick={handleOnConnectClick}
+            isInitialising={isConnectingToMetaMask}
+        >
             Connect to MetaMask <MetaMaskLogo width={25} height={25} />
         </Button>
     );
