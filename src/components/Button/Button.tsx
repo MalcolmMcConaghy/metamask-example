@@ -31,7 +31,12 @@ export default function Button(props: Props) {
         >
             {isInitialising ? (
                 <>
-                    Initializing... <Spinner animation="border" role="status" />
+                    Initializing...{' '}
+                    <Spinner
+                        animation="border"
+                        role="status"
+                        style={{ width: '25px', height: '25px' }}
+                    />
                 </>
             ) : isConnected ? (
                 <>Connected</>

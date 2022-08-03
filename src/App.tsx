@@ -7,18 +7,20 @@ import Button from './components/Button/Button';
 import AccountDetails from './components/AccountDetails/AccountDetails';
 import { chainIdMap } from './constants/chainIdMap';
 import { CoinResponse } from './types/coinstats';
+import './App.css';
 
 export default function App() {
     const [haveMetamask, sethaveMetamask] = useState(true);
     const [isConnected, setIsConnected] = useState(false);
     const [unsupportedNetwork, setUnsupportedNetwork] = useState(false);
     const [showUSD, setShowUSD] = useState(false);
+    const [isConnectingToMetaMask, setIsConnectingToMetaMask] = useState(false);
+    const [hasError, setHasError] = useState(false);
     const [USDPrice, setUSDPrice] = useState('');
     const [connectedNetwork, setConnectedNetwork] = useState('');
     const [tokenName, setTokenName] = useState('');
     const [accountAddress, setAccountAddress] = useState('');
     const [accountBalance, setAccountBalance] = useState('');
-    const [isConnectingToMetaMask, setIsConnectingToMetaMask] = useState(false);
     const { ethereum } = window;
     const provider = new ethers.providers.Web3Provider(window.ethereum);
 
@@ -38,27 +40,32 @@ export default function App() {
     };
 
     const getAccountAndBalance = async () => {
-        const response = await ethereum.request({
-            method: 'eth_requestAccounts',
-        });
-        setAccountAddress(response[0]);
-        await getBalance();
-        setConnectedNetwork(
-            chainIdMap.get(window.ethereum.networkVersion) ?? '',
-        );
+        try {
+            const response = await ethereum.request({
+                method: 'eth_requestAccounts',
+            });
+            setAccountAddress(response[0]);
+            await getBalance();
+            setConnectedNetwork(
+                chainIdMap.get(window.ethereum.networkVersion) ?? '',
+            );
 
-        setIsConnected(true);
+            setIsConnected(true);
+        } catch (error) {
+            setIsConnected(false);
+            setHasError(true);
+        }
     };
 
     const handleOnConnectClick = async () => {
         setIsConnectingToMetaMask(true);
-        await new Promise((r) => setTimeout(r, 2000));
         try {
             checkMetamaskAvailability();
             await getAccountAndBalance();
             setIsConnectingToMetaMask(false);
         } catch (error) {
             setIsConnected(false);
+            setHasError(true);
         }
     };
 
@@ -86,6 +93,7 @@ export default function App() {
                 setUSDPrice(usdPrice);
             } catch (error) {
                 setIsConnected(false);
+                setHasError(true);
             }
         }
 
@@ -137,29 +145,49 @@ export default function App() {
             <p>
                 Click the Connect to MetaMask button below to see your balance
             </p>
-            {unsupportedNetwork ? (
+            <p>Once connected, click your balance to see the value in USD</p>
+            {haveMetamask ? (
                 <>
-                    <Button onClick={handleOnReloadClick} reload>
-                        <>Reload</>
-                    </Button>
-                    <p>
-                        The current connected network is an unsupported network.
-                        Please switch to a Ethereum, MATIC or Binance-coin
-                        network
-                    </p>
+                    {unsupportedNetwork || hasError ? (
+                        <>
+                            <Button onClick={handleOnReloadClick} reload>
+                                <>Reload</>
+                            </Button>
+                            {hasError ? (
+                                <p className="errorMessage">
+                                    An unexpected error has occured. Please
+                                    reload and try again
+                                </p>
+                            ) : (
+                                <p className="unsupportedNetwork">
+                                    The current connected network is an
+                                    unsupported network. Please switch to a
+                                    Ethereum, MATIC or Binance-coin network
+                                </p>
+                            )}
+                        </>
+                    ) : (
+                        <Button
+                            onClick={handleOnConnectClick}
+                            isInitialising={isConnectingToMetaMask}
+                            isConnected={isConnected}
+                        >
+                            <>
+                                <span className="buttonLabel">
+                                    Connect to MetaMask
+                                </span>
+                                <MetaMaskLogo width={25} height={25} />
+                            </>
+                        </Button>
+                    )}
                 </>
             ) : (
-                <Button
-                    onClick={handleOnConnectClick}
-                    isInitialising={isConnectingToMetaMask}
-                    isConnected={isConnected}
-                >
-                    <>
-                        Connect to MetaMask{' '}
-                        <MetaMaskLogo width={25} height={25} />
-                    </>
-                </Button>
+                <p>
+                    You don&apos;t have MetaMask installed. Please install the
+                    MetaMask extension to use this app.
+                </p>
             )}
+
             {isConnected &&
                 !isConnectingToMetaMask &&
                 !unsupportedNetwork &&

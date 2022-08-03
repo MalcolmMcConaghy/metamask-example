@@ -1,0 +1,9 @@
+.unsupportedNetwork,
+.errorMessage {
+    color: #D50066;
+    margin-top: 10px;
+}
+
+.buttonLabel {
+    margin-right: 5px;
+}

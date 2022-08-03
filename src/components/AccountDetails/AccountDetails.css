@@ -3,7 +3,7 @@
     align-items: center;
     position: relative;
     margin-top: 1em;
-    width: 30%;
+    width: 100%;
 }
 
 .balanceButton {
@@ -40,4 +40,24 @@
     position: absolute;
     left: 45%;
     top: 0;
+}
+
+@media only screen and (min-width: 600px) {
+    .accountDetails {
+        width: 45%;
+    }
+}
+
+@media only screen and (min-width: 1024px) {
+    .accountDetails {
+        width: 35%;
+    }
+}
+
+
+
+@media only screen and (min-width: 1180px) {
+    .accountDetails {
+        width: 30%;
+    }
 }
