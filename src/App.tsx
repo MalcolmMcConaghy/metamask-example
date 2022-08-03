@@ -1,3 +1,5 @@
+import Button from './components/Button/Button';
+
 export default function App() {
-  return <div>Hello World!</div>;
+    return <Button onClick={() => alert('Hello world')} />;
 }
