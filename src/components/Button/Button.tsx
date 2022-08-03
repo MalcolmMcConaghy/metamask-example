@@ -11,7 +11,7 @@ export default function Button(props: Props) {
     const { onClick, isInitialising, children } = props;
     return (
         <button className="button" type="button" onClick={onClick}>
-            {isInitialising ? <>Initialising</> : children}
+            {isInitialising ? <>Initializing...</> : children}
         </button>
     );
 }

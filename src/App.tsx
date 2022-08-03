@@ -1,9 +1,8 @@
-import { useWeb3React } from '@web3-react/core';
 import { useEffect, useState } from 'react';
 import { ethers } from 'ethers';
 import { ReactComponent as MetaMaskLogo } from './assets/metamask-fox.svg';
 import Button from './components/Button/Button';
-import { MetaMask } from './connectors';
+import AccountDetails from './components/AccountDetails/AccountDetails';
 
 export default function App() {
     const [haveMetamask, sethaveMetamask] = useState(true);
@@ -12,7 +11,6 @@ export default function App() {
     const [accountBalance, setAccountBalance] = useState('');
     const [isConnectingToMetaMask, setIsConnectingToMetaMask] = useState(false);
     const { ethereum } = window;
-    const web3React = useWeb3React();
     const provider = new ethers.providers.Web3Provider(window.ethereum);
 
     const checkMetamaskAvailability = () => {
@@ -45,20 +43,26 @@ export default function App() {
 
     useEffect(() => {
         checkMetamaskAvailability();
-        web3React.activate(MetaMask);
     }, []);
 
-    useEffect(() => {
-        console.log(accountAddress, accountBalance);
-        console.log({ web3React });
-    }, [accountAddress, accountBalance]);
-
     return (
-        <Button
-            onClick={handleOnConnectClick}
-            isInitialising={isConnectingToMetaMask}
-        >
-            Connect to MetaMask <MetaMaskLogo width={25} height={25} />
-        </Button>
+        <>
+            <Button
+                onClick={handleOnConnectClick}
+                isInitialising={isConnectingToMetaMask}
+            >
+                Connect to MetaMask <MetaMaskLogo width={25} height={25} />
+            </Button>
+            {isConnected &&
+                !isConnectingToMetaMask &&
+                accountAddress &&
+                accountBalance && (
+                    <AccountDetails
+                        onClick={() => console.log('clicked')}
+                        address={accountAddress}
+                        balance={accountBalance}
+                    />
+                )}
+        </>
     );
 }
