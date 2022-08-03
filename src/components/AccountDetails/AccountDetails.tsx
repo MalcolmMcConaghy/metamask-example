@@ -1,3 +1,4 @@
+/* eslint-disable react/require-default-props */
 import './AccountDetails.css';
 
 interface Props {
@@ -5,6 +6,8 @@ interface Props {
     address: string;
     balance: string;
     tokenName: string;
+    usdPrice?: string;
+    showUSD?: boolean;
 }
 
 function truncateString(str: string, num: number) {
@@ -14,11 +17,24 @@ function truncateString(str: string, num: number) {
 }
 
 export default function AccountDetails(props: Props) {
-    const { onClick, address, balance, tokenName } = props;
+    const {
+        onClick,
+        address,
+        balance,
+        tokenName,
+        usdPrice = '',
+        showUSD = false,
+    } = props;
     return (
         <div className="accountDetails">
             <button className="balanceButton" type="button" onClick={onClick}>
-                {balance} {tokenName}
+                {showUSD ? (
+                    <>{`USD ${usdPrice}`}</>
+                ) : (
+                    <>
+                        {balance} {tokenName}
+                    </>
+                )}
             </button>
             <div className="address">{truncateString(address, 7)}</div>
         </div>

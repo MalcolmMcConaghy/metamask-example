@@ -5,11 +5,14 @@ import { ReactComponent as MetaMaskLogo } from './assets/metamask-fox.svg';
 import Button from './components/Button/Button';
 import AccountDetails from './components/AccountDetails/AccountDetails';
 import { chainIdMap } from './constants/chainIdMap';
+import { CoinResponse } from './types/coinstats';
 
 export default function App() {
     const [haveMetamask, sethaveMetamask] = useState(true);
     const [isConnected, setIsConnected] = useState(false);
     const [unsupportedNetwork, setUnsupportedNetwork] = useState(false);
+    const [showUSD, setShowUSD] = useState(false);
+    const [USDPrice, setUSDPrice] = useState('');
     const [connectedNetwork, setConnectedNetwork] = useState('');
     const [tokenName, setTokenName] = useState('');
     const [accountAddress, setAccountAddress] = useState('');
@@ -51,6 +54,30 @@ export default function App() {
 
     const handleOnReloadClick = () => {
         location.reload();
+    };
+
+    const handleOnBalanceClick = async () => {
+        if (!USDPrice) {
+            try {
+                const response = await fetch(
+                    `https://api.coinstats.app/public/v1/coins/${connectedNetwork}?currency=USD`,
+                );
+
+                const coinResponse: CoinResponse = await response.json();
+
+                const formatter = new Intl.NumberFormat('en-US', {
+                    style: 'currency',
+                    currency: 'USD',
+                });
+
+                const usdPrice = formatter.format(coinResponse.coin.price);
+                setUSDPrice(usdPrice);
+            } catch (error) {
+                setIsConnected(false);
+            }
+        }
+
+        setShowUSD(!showUSD);
     };
 
     useEffect(() => {
@@ -109,10 +136,12 @@ export default function App() {
                 accountAddress &&
                 accountBalance && (
                     <AccountDetails
-                        onClick={() => console.log('clicked')}
+                        onClick={handleOnBalanceClick}
                         address={accountAddress}
                         balance={accountBalance}
                         tokenName={tokenName}
+                        usdPrice={USDPrice}
+                        showUSD={showUSD}
                     />
                 )}
         </>
