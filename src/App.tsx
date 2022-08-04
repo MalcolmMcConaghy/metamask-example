@@ -31,9 +31,9 @@ export default function App() {
         sethaveMetamask(true);
     };
 
-    const getBalance = async () => {
-        if (!accountAddress) return;
-        const balance = await provider.getBalance(accountAddress);
+    const getBalance = async (_accountAddress: string) => {
+        if (!_accountAddress) return;
+        const balance = await provider.getBalance(_accountAddress);
         const formattedBalance = ethers.utils.formatEther(balance);
         const roundedBalance = Math.round(Number(formattedBalance) * 1e4) / 1e4;
         setAccountBalance(roundedBalance.toString());
@@ -45,13 +45,14 @@ export default function App() {
                 method: 'eth_requestAccounts',
             });
             setAccountAddress(response[0]);
-            await getBalance();
+            await getBalance(response[0]);
             setConnectedNetwork(
                 chainIdMap.get(window.ethereum.networkVersion) ?? '',
             );
 
             setIsConnected(true);
         } catch (error) {
+            console.log(error);
             setIsConnected(false);
             setHasError(true);
         }
@@ -136,16 +137,8 @@ export default function App() {
     });
 
     useEffect(() => {
-        provider.on('block', getBalance);
+        provider.on('block', () => getBalance(accountAddress));
     }, [getBalance]);
-
-    // console.log(
-    //     isConnected,
-    //     isConnectingToMetaMask,
-    //     unsupportedNetwork,
-    //     accountAddress,
-    //     accountBalance,
-    // );
 
     return (
         <>

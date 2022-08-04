@@ -2,6 +2,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import { act } from 'react-dom/test-utils';
+import { ethers } from 'ethers';
 import App from './App';
 
 const WALLET_ADDRESS = '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266';
@@ -46,6 +47,7 @@ describe('App connection', () => {
 
         await waitFor(() => {
             expect(screen.getByText('Connected')).toBeInTheDocument();
+            expect(screen.getByText('0xf39F...2266')).toBeInTheDocument();
         });
     });
 
