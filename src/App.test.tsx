@@ -1,21 +1,29 @@
-import { generateTestingUtils } from 'eth-testing';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
+import { act } from 'react-dom/test-utils';
 import App from './App';
 
+const WALLET_ADDRESS = '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266';
+const WINDOW_ETHEREUM = {
+    isMetaMask: true,
+    networkVersion: '1',
+    request: async (request: { method: string; params?: Array<unknown> }) => {
+        if (['eth_accounts', 'eth_requestAccounts'].includes(request.method)) {
+            return [WALLET_ADDRESS];
+        }
+
+        throw Error(`Unknown request: ${request.method}`);
+    },
+    on: () => {},
+};
+window.ethereum = WINDOW_ETHEREUM;
+
 describe('App connection', () => {
-    const testingUtils = generateTestingUtils({ providerType: 'MetaMask' });
-    beforeAll(() => {
-        // Manually inject the mocked provider in the window as MetaMask does
-        global.window.ethereum = testingUtils.getProvider();
-    });
     afterEach(() => {
-        // Clear all mocks between tests
-        testingUtils.clearAllMocks();
+        window.ethereum = { ...WINDOW_ETHEREUM };
     });
     test('renders App', async () => {
-        testingUtils.mockNotConnectedWallet();
         render(<App />);
         expect(
             screen.getByRole('button', {
@@ -25,14 +33,6 @@ describe('App connection', () => {
     });
 
     test('a user should be able to connect using MetaMask', async () => {
-        // Start with not connected wallet
-        testingUtils.mockNotConnectedWallet();
-        // Mock the connection request of MetaMask
-        testingUtils.mockRequestAccounts([
-            '0xf61B443A155b07D2b2cAeA2d99715dC84E839EEf',
-        ]);
-        testingUtils.mockChainId('0x1');
-
         render(<App />);
         const connectButton = screen.getByRole('button', {
             name: /Connect to MetaMask/i,
@@ -40,10 +40,42 @@ describe('App connection', () => {
 
         expect(connectButton).toBeInTheDocument();
 
-        userEvent.click(connectButton);
+        await act(async () => {
+            userEvent.click(connectButton);
+        });
 
         await waitFor(() => {
             expect(screen.getByText('Connected')).toBeInTheDocument();
+        });
+    });
+
+    test('reload page after trying to connect to an unsupported network', async () => {
+        window.ethereum = { ...WINDOW_ETHEREUM, networkVersion: '2' };
+        render(<App />);
+        const connectButton = screen.getByRole('button', {
+            name: /Connect to MetaMask/i,
+        });
+
+        expect(connectButton).toBeInTheDocument();
+
+        await act(async () => {
+            userEvent.click(connectButton);
+        });
+
+        await waitFor(() => {
+            expect(screen.getByText('Reload')).toBeInTheDocument();
+        });
+
+        const reloadButton = screen.getByRole('button', {
+            name: /Reload/i,
+        });
+
+        await act(async () => {
+            userEvent.click(reloadButton);
+        });
+
+        await waitFor(() => {
+            expect(connectButton).toBeInTheDocument();
         });
     });
 });

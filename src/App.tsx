@@ -139,7 +139,13 @@ export default function App() {
         provider.on('block', getBalance);
     }, [getBalance]);
 
-    console.log(connectedNetwork);
+    // console.log(
+    //     isConnected,
+    //     isConnectingToMetaMask,
+    //     unsupportedNetwork,
+    //     accountAddress,
+    //     accountBalance,
+    // );
 
     return (
         <>
